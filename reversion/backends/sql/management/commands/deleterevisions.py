@@ -1,8 +1,8 @@
 from datetime import timedelta
 from django.db import transaction, models, router
 from django.utils import timezone
-from reversion.models import Revision, Version
-from reversion.management.commands import BaseRevisionCommand
+from reversion.backends.sql.models import Revision, Version
+from reversion.backends.sql.management.commands import BaseRevisionCommand
 
 
 class Command(BaseRevisionCommand):

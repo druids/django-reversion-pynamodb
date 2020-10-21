@@ -1,4 +1,4 @@
-from reversion.views import _request_creates_revision, create_revision
+from reversion.revisions import create_revision, set_user, set_comment, deactivate
 
 
 class RevisionMiddleware:
@@ -12,15 +12,18 @@ class RevisionMiddleware:
     atomic = True
 
     def __init__(self, get_response):
-        self.get_response = create_revision(
-            manage_manually=self.manage_manually,
-            using=self.using,
-            atomic=self.atomic,
-            request_creates_revision=self.request_creates_revision
-        )(get_response)
-
-    def request_creates_revision(self, request):
-        return _request_creates_revision(request)
+        self.get_response = get_response
 
     def __call__(self, request):
-        return self.get_response(request)
+        with create_revision(manage_manually=self.manage_manually, using=self.using, atomic=self.atomic,
+                             middleware=True):
+            if hasattr(request, 'user') and request.user is not None and request.user.is_authenticated:
+                set_user(request.user)
+            set_comment('Request log from "RevisionMiddleware", path "{}"'.format(request.path))
+            response = self.get_response(request)
+        deactivate()
+        return response
+
+    def process_exception(self, request, exception):
+        """Closes the revision."""
+        deactivate()

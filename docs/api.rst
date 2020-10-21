@@ -74,7 +74,7 @@ You can load a :ref:`VersionQuerySet` of versions from the database. Versions ar
 
 .. code:: python
 
-    from reversion.models import Version
+    from reversion.backends.sql.models import Version
 
     # Load a queryset of versions for a specific model instance.
     versions = Version.objects.get_for_object(instance)
@@ -318,8 +318,8 @@ Revision API
 
 .. _VersionQuerySet:
 
-reversion.models.VersionQuerySet
---------------------------------
+reversion.backends.sql.models.VersionQuerySet
+---------------------------------------------
 
 A ``QuerySet`` of :ref:`Version`. The results are ordered with the most recent :ref:`Version` first.
 
@@ -385,8 +385,8 @@ A ``QuerySet`` of :ref:`Version`. The results are ordered with the most recent :
 
 .. _Version:
 
-reversion.models.Version
-------------------------
+reversion.backends.sql.models.Version
+-------------------------------------
 
 Represents a single model instance serialized in a revision.
 
@@ -447,8 +447,8 @@ Represents a single model instance serialized in a revision.
 
 .. _Revision:
 
-reversion.models.Revision
--------------------------
+reversion.sql.backends.models.Revision
+--------------------------------------
 
 Contains metadata about a revision, and groups together all :ref:`Version` instances created in that revision.
 

@@ -36,6 +36,7 @@ setup(
     cmdclass=cmdclass,
     install_requires=[
         "django>=1.11",
+        "import_string>=0.1.0",
     ],
     python_requires='>=3.6',
     classifiers=[

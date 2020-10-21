@@ -5,9 +5,12 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.transaction import get_connection
 from django.utils import timezone
+from django.test.utils import override_settings
 import reversion
 from test_app.models import TestModel, TestModelRelated, TestModelThrough, TestModelParent, TestMeta
 from test_app.tests.base import TestBase, TestBaseTransaction, TestModelMixin, UserMixin
+
+from pydjamodb.tests import DynamoDBTestMixin
 
 
 class SaveTest(TestModelMixin, TestBase):
@@ -87,6 +90,12 @@ class CreateRevisionTest(TestModelMixin, TestBase):
             obj = TestModel.objects.create()
         self.assertSingleRevision((obj,))
 
+    @override_settings(REVERSION_ENABLED=False)
+    def testDisabledCreateRevision(self):
+        with reversion.create_revision():
+            TestModel.objects.create()
+        self.assertNoRevision()
+
     def testCreateRevisionNested(self):
         with reversion.create_revision():
             with reversion.create_revision():
@@ -128,7 +137,8 @@ class CreateRevisionTest(TestModelMixin, TestBase):
         self.assertEqual(_callback.call_count, 1)
 
 
-class CreateRevisionAtomicTest(TestModelMixin, TestBaseTransaction):
+class CreateRevisionAtomicTest(DynamoDBTestMixin, TestModelMixin, TestBaseTransaction):
+
     def testCreateRevisionAtomic(self):
         self.assertFalse(get_connection().in_atomic_block)
         with reversion.create_revision():
@@ -141,7 +151,7 @@ class CreateRevisionAtomicTest(TestModelMixin, TestBaseTransaction):
 
     def testCreateRevisionInOnCommitHandler(self):
         from django.db import transaction
-        from reversion.models import Revision
+        from reversion.backends.sql.models import Revision
 
         self.assertEqual(Revision.objects.all().count(), 0)
 
@@ -156,6 +166,30 @@ class CreateRevisionAtomicTest(TestModelMixin, TestBaseTransaction):
             transaction.on_commit(on_commit)
 
         self.assertEqual(Revision.objects.all().count(), 2)
+
+    @override_settings(REVERSION_BACKEND='dynamodb')
+    def testCreateRevisionAtomicNotWorkingForDynamodb(self):
+        self.assertFalse(get_connection().in_atomic_block)
+        with reversion.create_revision():
+            self.assertFalse(get_connection().in_atomic_block)
+
+    @override_settings(REVERSION_BACKEND='dynamodb')
+    def testCreateRevisionNonAtomicDynamodb(self):
+        self.assertFalse(get_connection().in_atomic_block)
+        with reversion.create_revision(atomic=False):
+            self.assertFalse(get_connection().in_atomic_block)
+
+    @override_settings(REVERSION_BACKEND='dynamodb')
+    def testCreateRevisionDynamodb(self):
+        from django.db import transaction
+        from reversion.backends.dynamodb.models import Revision
+
+        self.assertEqual(Revision.objects_version.all().count(), 0)
+
+        with reversion.create_revision(atomic=True):
+            TestModel.objects.create()
+
+        self.assertEqual(Revision.objects_version.all().count(), 1)
 
 
 class CreateRevisionManageManuallyTest(TestModelMixin, TestBase):

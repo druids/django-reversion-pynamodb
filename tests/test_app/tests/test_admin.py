@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.shortcuts import resolve_url
 import reversion
-from reversion.admin import VersionAdmin
-from reversion.models import Version
+from reversion.backends.sql.admin import VersionAdmin
+from reversion.backends.sql.models import Version
 from test_app.models import TestModel, TestModelParent, TestModelInline, TestModelGenericInline, TestModelEscapePK
 from test_app.tests.base import TestBase, LoginMixin
 

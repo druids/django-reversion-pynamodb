@@ -3,15 +3,21 @@ from contextlib import contextmanager
 from functools import wraps
 from threading import local
 from django.apps import apps
-from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 from django.db import models, transaction, router
 from django.db.models.query import QuerySet
-from django.db.models.signals import post_save, m2m_changed
+from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.utils.encoding import force_str
 from django.utils import timezone
 from reversion.errors import RevisionManagementError, RegistrationError
 from reversion.signals import pre_revision_commit, post_revision_commit
+
+
+__all__ = (
+    'pre_revision_commit',
+    'post_revision_commit',
+)
 
 
 _VersionOptions = namedtuple("VersionOptions", (
@@ -45,6 +51,11 @@ _local = _Local()
 
 def is_active():
     return bool(_local.stack)
+
+
+def deactivate():
+    while is_active():
+        _pop_frame()
 
 
 def _current_frame():
@@ -106,35 +117,51 @@ def _pop_frame():
 
 
 def is_manage_manually():
-    return _current_frame().manage_manually
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        return _current_frame().manage_manually
+    else:
+        return False
 
 
 def set_user(user):
-    _update_frame(user=user)
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        _update_frame(user=user)
 
 
 def get_user():
-    return _current_frame().user
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        return _current_frame().user
+    else:
+        return None
 
 
 def set_comment(comment):
-    _update_frame(comment=comment)
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        _update_frame(comment=comment)
 
 
 def get_comment():
-    return _current_frame().comment
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        return _current_frame().comment
+    else:
+        return None
 
 
 def set_date_created(date_created):
-    _update_frame(date_created=date_created)
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        _update_frame(date_created=date_created)
 
 
 def get_date_created():
-    return _current_frame().date_created
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        return _current_frame().date_created
+    else:
+        return None
 
 
 def add_meta(model, **values):
-    _update_frame(meta=_current_frame().meta + ((model, values),))
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        _update_frame(meta=_current_frame().meta + ((model, values),))
 
 
 def _follow_relations(obj):
@@ -167,8 +194,8 @@ def _follow_relations_recursive(obj):
     return relations
 
 
-def _add_to_revision(obj, using, model_db, explicit):
-    from reversion.models import Version
+def _add_to_revision(obj, using, model_db, explicit, is_delete):
+    from reversion.models import prepare_version_object
     # Exit early if the object is not fully-formed.
     if obj.pk is None:
         return
@@ -181,42 +208,32 @@ def _add_to_revision(obj, using, model_db, explicit):
     versions = db_versions[using]
     if version_key in versions and not explicit:
         return
-    # Get the version data.
-    version = Version(
-        content_type=content_type,
-        object_id=object_id,
-        db=model_db,
-        format=version_options.format,
-        serialized_data=serializers.serialize(
-            version_options.format,
-            (obj,),
-            fields=version_options.fields,
-            use_natural_foreign_keys=version_options.use_natural_foreign_keys,
-        ),
-        object_repr=force_str(obj),
+
+    version = prepare_version_object(
+        obj, content_type, object_id, model_db, version_options, explicit, using, is_delete
     )
+
     # If the version is a duplicate, stop now.
-    if version_options.ignore_duplicates and explicit:
-        previous_version = Version.objects.using(using).get_for_object(obj, model_db=model_db).first()
-        if previous_version and previous_version._local_field_dict == version._local_field_dict:
-            return
+    if not version:
+        return
+
     # Store the version.
     db_versions = _copy_db_versions(db_versions)
     db_versions[using][version_key] = version
     _update_frame(db_versions=db_versions)
     # Follow relations.
     for follow_obj in _follow_relations(obj):
-        _add_to_revision(follow_obj, using, model_db, False)
+        _add_to_revision(follow_obj, using, model_db, False, is_delete)
 
 
-def add_to_revision(obj, model_db=None):
+def add_to_revision(obj, model_db=None, is_delete=False):
     model_db = model_db or router.db_for_write(obj.__class__, instance=obj)
     for db in _current_frame().db_versions.keys():
-        _add_to_revision(obj, db, model_db, True)
+        _add_to_revision(obj, db, model_db, True, is_delete)
 
 
 def _save_revision(versions, user=None, comment="", meta=(), date_created=None, using=None):
-    from reversion.models import Revision
+    from reversion.models import save_revision
     # Only save versions that exist in the database.
     # Use _base_manager so we don't have problems when _default_manager is overriden
     model_db_pks = defaultdict(lambda: defaultdict(set))
@@ -234,41 +251,21 @@ def _save_revision(versions, user=None, comment="", meta=(), date_created=None, 
     }
     versions = [
         version for version in versions
-        if version.object_id in model_db_existing_pks[version._model][version.db]
+        if version.is_delete or version.object_id in model_db_existing_pks[version._model][version.db]
     ]
     # Bail early if there are no objects to save.
     if not versions:
         return
+
     # Save a new revision.
-    revision = Revision(
-        date_created=date_created,
-        user=user,
-        comment=comment,
-    )
-    # Send the pre_revision_commit signal.
-    pre_revision_commit.send(
-        sender=create_revision,
-        revision=revision,
-        versions=versions,
-    )
-    # Save the revision.
-    revision.save(using=using)
-    # Save version models.
-    for version in versions:
-        version.revision = revision
-        version.save(using=using)
+    revision_id = save_revision(date_created, user, comment, versions, using)
+
     # Save the meta information.
     for meta_model, meta_fields in meta:
         meta_model._base_manager.db_manager(using=using).create(
-            revision=revision,
+            revision_id=revision_id,
             **meta_fields
         )
-    # Send the post_revision_commit signal.
-    post_revision_commit.send(
-        sender=create_revision,
-        revision=revision,
-        versions=versions,
-    )
 
 
 @contextmanager
@@ -277,31 +274,38 @@ def _dummy_context():
 
 
 @contextmanager
-def _create_revision_context(manage_manually, using, atomic):
-    context = transaction.atomic(using=using) if atomic else _dummy_context()
-    with context:
-        _push_frame(manage_manually, using)
-        try:
-            yield
-            # Only save for a db if that's the last stack frame for that db.
-            if not any(using in frame.db_versions for frame in _local.stack[:-1]):
-                current_frame = _current_frame()
-                _save_revision(
-                    versions=current_frame.db_versions[using].values(),
-                    user=current_frame.user,
-                    comment=current_frame.comment,
-                    meta=current_frame.meta,
-                    date_created=current_frame.date_created,
-                    using=using,
-                )
-        finally:
-            _pop_frame()
+def _create_revision_context(manage_manually, using, atomic, middleware):
+    if getattr(settings, 'REVERSION_ENABLED', True):
+        context = transaction.atomic(using=using) if atomic and using else _dummy_context()
+        with context:
+            _push_frame(manage_manually, using)
+            try:
+                try:
+                    yield
+                    # Only save for a db if that's the last stack frame for that db.
+                    if not any(using in frame.db_versions for frame in _local.stack[:-1]):
+                        current_frame = _current_frame()
+                        _save_revision(
+                            versions=current_frame.db_versions[using].values(),
+                            user=current_frame.user,
+                            comment=current_frame.comment,
+                            meta=current_frame.meta,
+                            date_created=current_frame.date_created,
+                            using=using,
+                        )
+                finally:
+                    _pop_frame()
+            except RevisionManagementError:
+                if not middleware:
+                    raise
+    else:
+        yield
 
 
-def create_revision(manage_manually=False, using=None, atomic=True):
-    from reversion.models import Revision
-    using = using or router.db_for_write(Revision)
-    return _ContextWrapper(_create_revision_context, (manage_manually, using, atomic))
+def create_revision(manage_manually=False, using=None, atomic=True, middleware=False):
+    from reversion.models import get_db_name
+
+    return _ContextWrapper(_create_revision_context, (manage_manually, using or get_db_name(), atomic, middleware))
 
 
 class _ContextWrapper(object):
@@ -330,6 +334,11 @@ def _post_save_receiver(sender, instance, using, **kwargs):
         add_to_revision(instance, model_db=using)
 
 
+def _post_delete_receiver(sender, instance, using, **kwargs):
+    if is_registered(sender) and is_active() and not is_manage_manually():
+        add_to_revision(instance, model_db=using, is_delete=True)
+
+
 def _m2m_changed_receiver(instance, using, action, model, reverse, **kwargs):
     if action.startswith("post_") and not reverse:
         if is_registered(instance) and is_active() and not is_manage_manually():
@@ -353,6 +362,7 @@ def get_registered_models():
 
 def _get_senders_and_signals(model):
     yield model, post_save, _post_save_receiver
+    yield model, post_delete, _post_delete_receiver
     opts = model._meta.concrete_model._meta
     for field in opts.local_many_to_many:
         m2m_model = field.remote_field.through

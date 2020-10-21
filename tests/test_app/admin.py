@@ -1,5 +1,5 @@
 from django.contrib import admin
-from reversion.admin import VersionAdmin
+from reversion.backends.sql.admin import VersionAdmin
 from test_app.models import TestModel, TestModelRelated
 
 

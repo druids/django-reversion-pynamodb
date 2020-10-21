@@ -15,15 +15,11 @@ class RevisionMiddlewareTest(TestModelMixin, TestBase):
     def testCreateRevision(self):
         response = self.client.post("/test-app/save-obj/")
         obj = TestModel.objects.get(pk=response.content)
-        self.assertSingleRevision((obj,))
+        self.assertSingleRevision((obj,), comment='Request log from "RevisionMiddleware", path "/test-app/save-obj/"')
 
     def testCreateRevisionError(self):
         with self.assertRaises(Exception):
             self.client.post("/test-app/save-obj-error/")
-        self.assertNoRevision()
-
-    def testCreateRevisionGet(self):
-        self.client.get("/test-app/create-revision/")
         self.assertNoRevision()
 
 
@@ -33,4 +29,12 @@ class RevisionMiddlewareUserTest(TestModelMixin, LoginMixin, TestBase):
     def testCreateRevisionUser(self):
         response = self.client.post("/test-app/save-obj/")
         obj = TestModel.objects.get(pk=response.content)
-        self.assertSingleRevision((obj,), user=self.user)
+        self.assertSingleRevision(
+            (obj,), user=self.user, comment='Request log from "RevisionMiddleware", path "/test-app/save-obj/"'
+        )
+
+    @override_settings(REVERSION_ENABLED=False)
+    def testDisabledRevision(self):
+        response = self.client.post("/test-app/save-obj/")
+        TestModel.objects.get(pk=response.content)
+        self.assertNoRevision()
