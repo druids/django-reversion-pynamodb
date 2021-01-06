@@ -1,9 +1,9 @@
 .. _api:
 
-django-reversion API
+django-reversion-pynamodb API
 ====================
 
-Use the django-reversion API to build version-controlled apps. See also :ref:`Views` and :ref:`Middleware`.
+Use the django-reversion-pynamodb API to build version-controlled apps. See also :ref:`Views` and :ref:`Middleware`.
 
 
 Overview
@@ -12,7 +12,7 @@ Overview
 Registering models
 ^^^^^^^^^^^^^^^^^^
 
-Models must be registered with django-reversion before they can be used with the API.
+Models must be registered with django-reversion-pynamodb before they can be used with the API.
 
 .. code:: python
 
@@ -25,7 +25,7 @@ Models must be registered with django-reversion before they can be used with the
         pass
 
 .. Hint::
-    If you're using the :ref:`admin`, model registration is automatic. If you’re using django-reversion in a management command, make sure you call ``django.contrib.admin.autodiscover()`` to load the admin modules before using the django-reversion API.
+    If you're using the :ref:`admin`, model registration is automatic. If you’re using django-reversion-pynamodb in a management command, make sure you call ``django.contrib.admin.autodiscover()`` to load the admin modules before using the django-reversion-pynamodb API.
 
 .. include:: /_include/post-register.rst
 
@@ -62,7 +62,7 @@ A *revision* represents one or more changes made to your model instances, groupe
 
 .. Important::
 
-    Bulk actions, such as ``Queryset.update()``, do not send signals, so won't be noticed by django-reversion.
+    Bulk actions, such as ``Queryset.update()``, do not send signals, so won't be noticed by django-reversion-pynamodb.
 
 
 Loading revisions
@@ -155,7 +155,7 @@ Registration API
 
 ``reversion.register(model, **options)``
 
-    Registers a model with django-reversion.
+    Registers a model with django-reversion-pynamodb.
 
     Throws :ref:`RegistrationError` if the model has already been registered.
 
@@ -188,14 +188,14 @@ Registration API
         See `Serialization of natural keys <https://docs.djangoproject.com/en/3.1/topics/serialization/#serialization-of-natural-keys>`_
 
     .. Hint::
-        By default, django-reversion will not register any parent classes of a model that uses multi-table inheritance. If you wish to also add parent models to your revision, you must explicitly add their ``parent_ptr`` fields to the ``follow`` parameter when you register the model.
+        By default, django-reversion-pynamodb will not register any parent classes of a model that uses multi-table inheritance. If you wish to also add parent models to your revision, you must explicitly add their ``parent_ptr`` fields to the ``follow`` parameter when you register the model.
 
     .. include:: /_include/post-register.rst
 
 
 ``reversion.is_registered(model)``
 
-    Returns whether the given model has been registered with django-reversion.
+    Returns whether the given model has been registered with django-reversion-pynamodb.
 
     ``model``
         The Django model to check.
@@ -203,7 +203,7 @@ Registration API
 
 ``reversion.unregister(model)``
 
-    Unregisters the given model from django-reversion.
+    Unregisters the given model from django-reversion-pynamodb.
 
     .. include:: /_include/throws-registration-error.rst
 

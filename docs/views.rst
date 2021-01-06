@@ -3,7 +3,7 @@
 Views
 =====
 
-Shortcuts when using django-reversion in views.
+Shortcuts when using django-reversion-pynamodb in views.
 
 
 Decorators

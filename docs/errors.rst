@@ -3,7 +3,7 @@
 Errors
 ======
 
-django-reversion defines several custom errors.
+django-reversion-pynamodb defines several custom errors.
 
 
 .. _RegistrationError:

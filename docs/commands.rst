@@ -3,7 +3,7 @@
 Management commands
 ===================
 
-django-reversion includes a number of ``django-admin.py`` management commands.
+django-reversion-pynamodb includes a number of ``django-admin.py`` management commands.
 
 
 .. _createinitialrevisions:
@@ -11,7 +11,7 @@ django-reversion includes a number of ``django-admin.py`` management commands.
 createinitialrevisions
 ----------------------
 
-Creates an initial revision for all registered models in your project. It should be run after installing django-reversion, or registering a new model with django-reversion.
+Creates an initial revision for all registered models in your project. It should be run after installing django-reversion-pynamodb, or registering a new model with django-reversion-pynamodb.
 
 .. code:: bash
 

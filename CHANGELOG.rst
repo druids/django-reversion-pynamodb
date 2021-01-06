@@ -1,7 +1,13 @@
 .. _changelog:
 
-django-reversion changelog
-==========================
+django-reversion-pynamodb changelog
+===================================
+
+0.0.1 - 2021-01-06
+------------------
+
+- Created for of django-reversion with DynamoDB storage support
+
 
 3.0.8 - 2020-08-31
 ------------------

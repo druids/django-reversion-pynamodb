@@ -3,7 +3,7 @@
 Signals
 =======
 
-django-reversion provides two custom signals.
+django-reversion-pynamodb provides two custom signals.
 
 
 reversion.signals.pre_revision_commit

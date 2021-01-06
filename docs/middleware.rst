@@ -3,7 +3,7 @@
 Middleware
 ==========
 
-Shortcuts when using django-reversion in views.
+Shortcuts when using django-reversion-pynamodb in views.
 
 
 reversion.middleware.RevisionMiddleware

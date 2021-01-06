@@ -3,7 +3,7 @@
 Admin integration
 =================
 
-django-reversion can be used to add rollback and recovery to your admin site.
+django-reversion-pynamodb can be used to add rollback and recovery to your admin site.
 
 .. Warning::
     The admin integration requires that your database engine supports transactions. This is the case for PostgreSQL, SQLite and MySQL InnoDB. If you are using MySQL MyISAM, upgrade your database tables to InnoDB!
@@ -94,7 +94,7 @@ A subclass of ``django.contrib.ModelAdmin`` providing rollback and recovery.
 
 ``reversion_register(model, **options)``
 
-    Callback used by the auto-registration machinery to register the model with django-reversion. Override this to customize how models are registered.
+    Callback used by the auto-registration machinery to register the model with django-reversion-pynamodb. Override this to customize how models are registered.
 
     .. code:: python
 
@@ -103,7 +103,7 @@ A subclass of ``django.contrib.ModelAdmin`` providing rollback and recovery.
             super().reversion_register(model, **options)
 
     ``model``
-        The model that will be registered with django-reversion.
+        The model that will be registered with django-reversion-pynamodb.
 
     ``options``
         Registration options, see :ref:`reversion.register() <register>`.

@@ -1,10 +1,11 @@
 .. _index:
 
-django-reversion
-================
+django-reversion-pynamodb
+=========================
 
-**django-reversion** is an extension to the Django web framework that provides
-version control for model instances.
+**django-reversion-pynamodb** is an extension to the Django web framework that provides
+version control for model instances. Library extends ``django-reversion-pynamodb`` library and provides
+possibility to store version data in DynamoDB database.
 
 
 Features
@@ -18,9 +19,9 @@ Features
 Installation
 ------------
 
-To install django-reversion:
+To install django-reversion-pynamodb:
 
-1.  Install with pip: ``pip install django-reversion``.
+1.  Install with pip: ``pip install django-reversion-pynamodb``.
 2.  Add ``'reversion'`` and ``reversion.backends.sql`` to ``INSTALLED_APPS``.
 3.  Run ``manage.py migrate``.
 
@@ -28,7 +29,7 @@ To install django-reversion:
 Admin integration
 -----------------
 
-django-reversion can be used to add rollback and recovery to your admin site.
+django-reversion-pynamodb can be used to add rollback and recovery to your admin site.
 
 .. include:: /_include/admin.rst
 
@@ -38,7 +39,7 @@ For more information about admin integration, see :ref:`admin`.
 Low-level API
 -------------
 
-You can use the django-reversion API to build version-controlled applications. See :ref:`api`.
+You can use the django-reversion-pynamodb API to build version-controlled applications. See :ref:`api`.
 
 
 More information

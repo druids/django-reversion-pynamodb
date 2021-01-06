@@ -1,2 +1,2 @@
 .. Hint::
-    Whenever you register a model with django-reversion, run :ref:`createinitialrevisions`.
+    Whenever you register a model with django-reversion-pynamodb, run :ref:`createinitialrevisions`.

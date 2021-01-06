@@ -21,21 +21,21 @@ def read(filepath):
 
 
 setup(
-    name="django-reversion",
+    name="django-reversion-pynamodb",
     version='.'.join(str(x) for x in __version__),
     license="BSD",
     description="An extension to the Django web framework that provides version control for model instances.",
     long_description=read('README.rst'),
-    author="Dave Hall",
-    author_email="dave@etianen.com",
-    url="http://github.com/etianen/django-reversion",
+    author="Dave Hall,Lubos Matl",
+    author_email="dave@etianen.com, matllubos@gmail.com",
+    url="http://github.com/druids/django-reversion-pynamodb",
     zip_safe=False,
     packages=find_packages(),
     package_data={
         "reversion": ["locale/*/LC_MESSAGES/django.*", "templates/reversion/*.html"]},
     cmdclass=cmdclass,
     install_requires=[
-        "django>=1.11",
+        "django>=2.2",
         "import_string>=0.1.0",
     ],
     python_requires='>=3.6',

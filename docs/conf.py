@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# django-reversion documentation build configuration file, created by
+# django-reversion-pynamodb documentation build configuration file, created by
 # sphinx-quickstart on Thu Jun  2 08:41:36 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -51,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'django-reversion'
+project = 'django-reversion-pynamodb'
 copyright = '2016, Dave Hall'
 author = 'Dave Hall'
 
@@ -136,7 +136,7 @@ todo_include_todos = False
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = 'django-reversion v1.10.3'
+# html_title = 'django-reversion-pynamodb v1.10.3'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
@@ -236,7 +236,7 @@ html_static_path = []
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'django-reversiondoc'
+htmlhelp_basename = 'django-reversion-pynamodbdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -262,7 +262,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'django-reversion.tex', 'django-reversion Documentation',
+    (master_doc, 'django-reversion-pynamodb.tex', 'django-reversion-pynamodb Documentation',
      'Dave Hall', 'manual'),
 ]
 
@@ -298,7 +298,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'django-reversion', 'django-reversion Documentation',
+    (master_doc, 'django-reversion-pynamodb', 'django-reversion-pynamodb Documentation',
      [author], 1)
 ]
 
@@ -313,8 +313,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'django-reversion', 'django-reversion Documentation',
-     author, 'django-reversion', 'One line description of project.',
+    (master_doc, 'django-reversion-pynamodb', 'django-reversion-pynamodb Documentation',
+     author, 'django-reversion-pynamodb', 'One line description of project.',
      'Miscellaneous'),
 ]
 
