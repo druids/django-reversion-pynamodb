@@ -14,9 +14,10 @@ from django.utils.translation import ugettext as _
 from django.utils.encoding import force_str
 from django.utils.formats import localize
 from reversion.errors import RevertError
-from reversion.models import Version
 from reversion.revisions import is_active, register, is_registered, set_comment, create_revision, set_user
 from reversion.views import _RollBackRevisionView
+
+from .models import Version
 
 
 class VersionAdmin(admin.ModelAdmin):

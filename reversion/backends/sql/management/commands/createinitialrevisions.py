@@ -3,8 +3,8 @@ import json
 from django.apps import apps
 from django.core.management import CommandError
 from django.db import reset_queries, transaction, router
-from reversion.models import Revision, Version, _safe_subquery
-from reversion.management.commands import BaseRevisionCommand
+from reversion.backends.sql.models import Revision, Version, _safe_subquery
+from reversion.backends.sql.management.commands import BaseRevisionCommand
 from reversion.revisions import create_revision, set_comment, add_to_revision, add_meta
 
 

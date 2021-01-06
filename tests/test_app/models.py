@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from reversion.models import Revision
+from reversion.backends.sql.models import Revision
 
 
 class TestModelGenericInline(models.Model):

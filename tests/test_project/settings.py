@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "reversion",
+    "reversion.backends.sql",
+    "reversion.backends.dynamodb",
     "test_app",
 ]
 
@@ -133,3 +135,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = "/static/"
+
+PYDJAMODB_DATABASE = {
+    'HOST': 'http://localhost:8000',
+    'AWS_ACCESS_KEY_ID': '_',
+    'AWS_SECRET_ACCESS_KEY': '_',
+    'AWS_REGION': None,
+    'TABLE_PREFIX': 'reversion',
+    'BILLING_MODE': 'PAY_PER_REQUEST',
+}
+
+TEST_RUNNER = 'pydjamodb.test_runner.DynamoDBTestDiscoverRunner'

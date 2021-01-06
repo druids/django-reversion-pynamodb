@@ -5,11 +5,10 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('reversion', '0001_squashed_0004_auto_20160611_1202'),
+        ('reversion_backends_sql', '0001_squashed_0004_auto_20160611_1202'),
         ('contenttypes', '0002_remove_content_type_name'),
     ]
 
@@ -52,7 +51,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TestModelParent',
             fields=[
-                ('testmodel_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='test_app.testmodel')),
+                ('testmodel_ptr',
+                 models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True,
+                                      primary_key=True, serialize=False, to='test_app.testmodel')),
                 ('parent_name', models.CharField(default='parent v1', max_length=191)),
             ],
             bases=('test_app.testmodel',),
@@ -62,8 +63,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(default='v1', max_length=191)),
-                ('test_model', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='test_app.testmodel')),
-                ('test_model_related', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='test_app.testmodelrelated')),
+                ('test_model', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+',
+                                                 to='test_app.testmodel')),
+                ('test_model_related', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+',
+                                                         to='test_app.testmodelrelated')),
             ],
         ),
         migrations.CreateModel(
@@ -71,14 +74,16 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nested_inline_name', models.CharField(default='v1', max_length=191)),
-                ('test_model_inline', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='test_app.testmodelinline')),
+                ('test_model_inline',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='test_app.testmodelinline')),
             ],
         ),
         migrations.CreateModel(
             name='TestModelInlineByNaturalKey',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('test_model', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='test_app.testmodelwithnaturalkey')),
+                ('test_model',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='test_app.testmodelwithnaturalkey')),
             ],
         ),
         migrations.CreateModel(
@@ -87,25 +92,29 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('object_id', models.IntegerField()),
                 ('inline_name', models.CharField(default='v1', max_length=191)),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
+                ('content_type',
+                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
             ],
         ),
         migrations.AddField(
             model_name='testmodel',
             name='related',
-            field=models.ManyToManyField(blank=True, related_name='_testmodel_related_+', to='test_app.TestModelRelated'),
+            field=models.ManyToManyField(blank=True, related_name='_testmodel_related_+',
+                                         to='test_app.TestModelRelated'),
         ),
         migrations.AddField(
             model_name='testmodel',
             name='related_through',
-            field=models.ManyToManyField(blank=True, related_name='_testmodel_related_through_+', through='test_app.TestModelThrough', to='test_app.TestModelRelated'),
+            field=models.ManyToManyField(blank=True, related_name='_testmodel_related_through_+',
+                                         through='test_app.TestModelThrough', to='test_app.TestModelRelated'),
         ),
         migrations.CreateModel(
             name='TestMeta',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=191)),
-                ('revision', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='reversion.revision')),
+                ('revision', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                               to='reversion_backends_sql.revision')),
             ],
         ),
     ]

@@ -11,7 +11,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 import reversion
-from reversion.models import Revision, Version
+from reversion.backends.sql.models import Revision, Version
 from test_app.models import TestModel, TestModelParent
 
 
@@ -19,7 +19,7 @@ from test_app.models import TestModel, TestModelParent
 
 class TestBaseMixin(object):
 
-    multi_db = True
+    databases = list(settings.DATABASES.keys())
 
     def reloadUrls(self):
         reload(import_module(settings.ROOT_URLCONF))
