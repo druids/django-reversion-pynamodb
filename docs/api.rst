@@ -1,7 +1,7 @@
 .. _api:
 
 django-reversion-pynamodb API
-====================
+=============================
 
 Use the django-reversion-pynamodb API to build version-controlled apps. See also :ref:`Views` and :ref:`Middleware`.
 

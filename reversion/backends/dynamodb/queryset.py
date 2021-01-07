@@ -57,7 +57,8 @@ class ObjectVersionDynamoDBQuerySet(DynamoDBQuerySet):
                 results = self._results
 
                 self._prev_versions = results[1:]
-                self._results = results[:self._limit - 1]
+                # there are more results than limit
+                self._results = results[:self._limit]
                 for version, prev_version in zip_longest(self._results, self._prev_versions):
                     version.prev_version = prev_version
                 if len(results) > self._limit:
