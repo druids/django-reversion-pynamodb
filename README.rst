@@ -29,25 +29,22 @@ Check out the latest ``django-reversion-pynamodb`` documentation at `Getting Sta
 
 
 Issue tracking and source code can be found at the
-`main project website <http://github.com/etianen/django-reversion-pynamodb>`_.
-
-You can keep up to date with the latest announcements by joining the
-`django-reversion-pynamodb discussion group <http://groups.google.com/group/django-reversion-pynamodb>`_.
+`main project website <http://github.com/druids/django-reversion-pynamodb>`_.
 
 Upgrading
 =========
 
-Please check the `Changelog <https://github.com/etianen/django-reversion-pynamodb/blob/master/CHANGELOG.rst>`_ before upgrading
+Please check the `Changelog <https://github.com/druids/django-reversion-pynamodb/blob/master/CHANGELOG.rst>`_ before upgrading
 your installation of django-reversion-pynamodb.
 
 Contributing
 ============
 
 Bug reports, bug fixes, and new features are always welcome. Please raise issues on the
-`django-reversion-pynamodb project site <http://github.com/etianen/django-reversion-pynamodb>`_, and submit
+`django-reversion-pynamodb project site <http://github.com/druids/django-reversion-pynamodb>`_, and submit
 pull requests for any new code.
 
-1. Fork the `repository <http://github.com/etianen/django-reversion-pynamodb>`_ on GitHub.
+1. Fork the `repository <http://github.com/druids/django-reversion-pynamodb>`_ on GitHub.
 2. Make a branch off of master and commit your changes to it.
 3. Install requirements.
 
@@ -67,7 +64,7 @@ Contributors
 ============
 
 The django-reversion-pynamodb project was developed by `Dave Hall <http://www.etianen.com/>`_ and contributed
-to by `many other people <https://github.com/etianen/django-reversion-pynamodb/graphs/contributors>`_.
+to by `many other people <https://github.com/druids/django-reversion-pynamodb/graphs/contributors>`_.
 
 
 .. |Docs| image:: https://readthedocs.org/projects/django-reversion-pynamodb/badge/?version=latest
@@ -78,5 +75,5 @@ to by `many other people <https://github.com/etianen/django-reversion-pynamodb/g
    :target: https://github.com/rhenter/django-reversion-pynamodb/blob/master/LICENSE
 .. |PyPI latest| image:: https://img.shields.io/pypi/v/django-reversion-pynamodb.svg?maxAge=120
    :target: https://pypi.python.org/pypi/django-reversion-pynamodb
-.. |TravisCI| image:: https://travis-ci.org/etianen/django-reversion-pynamodb.svg?branch=master
-   :target: https://travis-ci.org/etianen/django-reversion-pynamodb
+.. |TravisCI| image:: https://travis-ci.org/druids/django-reversion-pynamodb.svg?branch=master
+   :target: https://travis-ci.org/druids/django-reversion-pynamodb
