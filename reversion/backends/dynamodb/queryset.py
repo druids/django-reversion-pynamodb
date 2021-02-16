@@ -63,7 +63,7 @@ class ObjectVersionDynamoDBQuerySet(DynamoDBQuerySet):
                     version.prev_version = prev_version
                 if len(results) > self._limit:
                     self._next_key = {
-                        key: self._execution._items[len(self._results) - 1][key]
+                        key: self._results[-1].serialize()[key]
                         for key in self._execution.page_iter.key_names
                     }
             else:
