@@ -190,7 +190,7 @@ class Version(ReversionDynamoModel):
     def prev_version(self):
         return Version.objects.set_hash_key(self.object_key).filter(
             date_created__lt=self.date_created
-        ).last()
+        ).first()
 
     @property
     def is_revision(self):
