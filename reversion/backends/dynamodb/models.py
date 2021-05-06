@@ -162,8 +162,14 @@ class Version(ReversionDynamoModel):
         for parent_model, field in self._model._meta.concrete_model._meta.parents.items():
             content_type = _get_content_type(parent_model)
             parent_id = field_dict[field.attname]
-            parent_version = Version.get(self.revision_id, get_key_from_content_type_and_id(content_type, parent_id))
-            field_dict.update(parent_version.field_dict)
+            try:
+                parent_version = Version.get(
+                    self.revision_id,
+                    get_key_from_content_type_and_id(content_type, parent_id)
+                )
+                field_dict.update(parent_version.field_dict)
+            except Version.DoesNotExist:
+                pass
         return field_dict
 
     @cached_property

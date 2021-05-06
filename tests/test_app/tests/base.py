@@ -90,6 +90,13 @@ class TestModelParentMixin(TestModelMixin):
         reversion.register(TestModelParent, follow=("testmodel_ptr",))
 
 
+class TestModelParentWithoutFollowMixin(TestModelMixin):
+
+    def setUp(self):
+        super().setUp()
+        reversion.register(TestModelParent)
+
+
 @override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"])
 class UserMixin(TestBase):
 
