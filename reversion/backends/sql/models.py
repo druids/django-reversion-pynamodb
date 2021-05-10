@@ -245,12 +245,15 @@ class Version(models.Model):
         for parent_model, field in self._model._meta.concrete_model._meta.parents.items():
             content_type = _get_content_type(parent_model, self._state.db)
             parent_id = field_dict[field.attname]
-            parent_version = self.revision.version_set.get(
-                content_type=content_type,
-                object_id=parent_id,
-                db=self.db,
-            )
-            field_dict.update(parent_version.field_dict)
+            try:
+                parent_version = self.revision.version_set.get(
+                    content_type=content_type,
+                    object_id=parent_id,
+                    db=self.db,
+                )
+                field_dict.update(parent_version.field_dict)
+            except Version.DoesNotExist:
+                pass
         return field_dict
 
     def revert(self):

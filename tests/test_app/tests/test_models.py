@@ -7,7 +7,7 @@ from test_app.models import (
     TestModelNestedInline,
     TestModelInlineByNaturalKey, TestModelWithNaturalKey,
 )
-from test_app.tests.base import TestBase, TestModelMixin, TestModelParentMixin
+from test_app.tests.base import TestBase, TestModelMixin, TestModelParentMixin, TestModelParentWithoutFollowMixin
 import json
 
 from pydjamodb.tests import DynamoDBTestMixin
@@ -396,6 +396,26 @@ class FieldDictInheritanceTest(DynamoDBTestMixin, TestModelParentMixin, TestBase
             "name": "v2",
             "parent_name": "parent v2",
             "related": [],
+            "testmodel_ptr_id": obj.pk,
+        })
+
+
+class FieldDictInheritanceWithoutFollowTest(DynamoDBTestMixin, TestModelParentWithoutFollowMixin, TestBase):
+
+    def testFieldDictInheritanceWithoutParentFollow(self):
+        with reversion.create_revision():
+            obj = TestModelParent.objects.create()
+        self.assertEqual(Version.objects.get_for_object(obj).get().field_dict, {
+            "parent_name": "parent v1",
+            "testmodel_ptr_id": obj.pk,
+        })
+
+    @override_settings(REVERSION_BACKEND='dynamodb')
+    def testFieldDictInheritanceWithoutParentFollowDynamoDB(self):
+        with reversion.create_revision():
+            obj = TestModelParent.objects.create()
+        self.assertEqual(DynamoDBVersion.objects.get_for_object(obj).get().field_dict, {
+            "parent_name": "parent v1",
             "testmodel_ptr_id": obj.pk,
         })
 
