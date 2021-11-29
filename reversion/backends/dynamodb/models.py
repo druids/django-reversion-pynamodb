@@ -15,6 +15,7 @@ from django.utils.functional import cached_property
 
 from reversion.backends.utils import get_object_version, get_local_field_dict
 from reversion.revisions import _get_options
+from reversion.signals import pre_revision_commit, post_revision_commit
 
 from .queryset import (
     ObjectVersionDynamoDBQuerySet, RevisionDynamoDBQuerySet, ObjectVersionRevisionDynamoDBQuerySet, NULL_OBJ_KEY
@@ -245,22 +246,31 @@ def prepare_version_object(obj, content_type, object_id, model_db, version_optio
 
 
 def save_revision(date_created, user, comment, versions, using):
+    from reversion.revisions import create_revision
+
     # Generate random revision PK
     revision_id = str(uuid4())
 
     user_key = get_key_from_object(user)
 
+    revision = ReversionDynamoModel(
+        revision_id=revision_id,
+        object_key=NULL_OBJ_KEY,
+        date_created=date_created,
+        user_key=user_key,
+        comment=comment
+    )
+
+    # Send the pre_revision_commit signal.
+    pre_revision_commit.send(
+        sender=create_revision,
+        revision=revision,
+        versions=versions
+    )
+
     # Save version models.
     with Version.batch_write() as batch:
-        batch.save(
-            ReversionDynamoModel(
-                revision_id=revision_id,
-                object_key=NULL_OBJ_KEY,
-                date_created=date_created,
-                user_key=user_key,
-                comment=comment
-            )
-        )
+        batch.save(revision)
 
         for version in versions:
             version.revision_id = revision_id
@@ -268,7 +278,21 @@ def save_revision(date_created, user, comment, versions, using):
             version.user_key = user_key
             version.comment = comment
             batch.save(version)
+    post_revision_commit.send(
+        sender=create_revision,
+        revision=revision,
+        versions=versions,
+        revision_id=revision_id
+    )
+    return revision_id
 
 
 def get_db_name():
     return None
+
+
+def get_revision_or_none(id):
+    try:
+        return Revision.get(id, NULL_OBJ_KEY)
+    except Version.DoesNotExist:
+        return None
