@@ -29,6 +29,10 @@ def get_db_name():
     return MODELS[getattr(settings, 'REVERSION_BACKEND', None) or BACKENDS[0]].get_db_name()
 
 
+def get_revision_or_none(id):
+    return MODELS[getattr(settings, 'REVERSION_BACKEND', None) or BACKENDS[0]].get_revision_or_none(id)
+
+
 if len(BACKENDS) == 1:
     Version = import_string('reversion.backends.{}.models.Version'.format(BACKENDS[0]))
     Reversion = import_string('reversion.backends.{}.models.Version'.format(BACKENDS[0]))

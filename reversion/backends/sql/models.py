@@ -370,9 +370,17 @@ def save_revision(date_created, user, comment, versions, using):
         sender=create_revision,
         revision=revision,
         versions=versions,
+        revision_id=revision.id
     )
     return revision.pk
 
 
 def get_db_name():
     return router.db_for_write(Revision)
+
+
+def get_revision_or_none(id):
+    try:
+        return Revision.objects.get(pk=id)
+    except ObjectDoesNotExist:
+        return None

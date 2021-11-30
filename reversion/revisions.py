@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import models, transaction, router
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save, m2m_changed, post_delete
+from django.db import DEFAULT_DB_ALIAS
 from django.utils.encoding import force_str
 from django.utils import timezone
 from reversion.errors import RevisionManagementError, RegistrationError
@@ -303,9 +304,7 @@ def _create_revision_context(manage_manually, using, atomic, middleware):
 
 
 def create_revision(manage_manually=False, using=None, atomic=True, middleware=False):
-    from reversion.models import get_db_name
-
-    return _ContextWrapper(_create_revision_context, (manage_manually, using or get_db_name(), atomic, middleware))
+    return _ContextWrapper(_create_revision_context, (manage_manually, using or DEFAULT_DB_ALIAS, atomic, middleware))
 
 
 class _ContextWrapper(object):
