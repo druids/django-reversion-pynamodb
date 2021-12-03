@@ -304,7 +304,9 @@ def _create_revision_context(manage_manually, using, atomic, middleware):
 
 
 def create_revision(manage_manually=False, using=None, atomic=True, middleware=False):
-    return _ContextWrapper(_create_revision_context, (manage_manually, using or DEFAULT_DB_ALIAS, atomic, middleware))
+    from reversion.models import get_db_name
+
+    return _ContextWrapper(_create_revision_context, (manage_manually, using or get_db_name(), atomic, middleware))
 
 
 class _ContextWrapper(object):
