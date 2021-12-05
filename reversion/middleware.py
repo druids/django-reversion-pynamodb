@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from reversion.revisions import create_revision, set_user, set_comment, deactivate
 
 
@@ -9,10 +11,9 @@ class RevisionMiddleware:
 
     using = None
 
-    atomic = True
-
     def __init__(self, get_response):
         self.get_response = get_response
+        self.atomic = getattr(settings, 'REVERSION_ATOMIC_REVISION', True)
 
     def __call__(self, request):
         with create_revision(manage_manually=self.manage_manually, using=self.using, atomic=self.atomic,
