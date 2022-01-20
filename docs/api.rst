@@ -437,6 +437,11 @@ Represents a single model instance serialized in a revision.
 
     .. include:: /_include/throws-revert-error.rst
 
+``Version.raw_field_dict``
+
+    A dictionary of stored raw model fields. This includes fields from any parent models in the same revision. And include fields that was removed from model class.
+
+    .. include:: /_include/throws-revert-error.rst
 
 ``Version.revert()``
 

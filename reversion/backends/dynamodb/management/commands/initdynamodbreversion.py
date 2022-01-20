@@ -22,7 +22,7 @@ class Command(BaseCommand):
             if input(message) != 'yes':
                 raise CommandError('Init DynamoDB revisions cancelled.')
 
-        self.stdout.write(f'Init DynamoDB revisions')
+        self.stdout.write('Init DynamoDB revisions')
 
         connection = TableConnection('reversion')
         if connection.exists_table():

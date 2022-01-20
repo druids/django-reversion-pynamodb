@@ -321,6 +321,28 @@ class FieldDictTest(DynamoDBTestMixin, TestModelMixin, TestBase):
             "related": [],
         })
 
+    def testRawFieldDict(self):
+        with reversion.create_revision():
+            obj = TestModel.objects.create()
+        version = Version.objects.get_for_object(obj).get()
+
+        # Add old field data
+        serialized_data_python = json.loads(version.serialized_data)
+        serialized_data_python[0]['fields']["old_field"] = "old value"
+        version.serialized_data = json.dumps(serialized_data_python)
+        version.save()
+
+        self.assertEqual(Version.objects.get_for_object(obj).get().field_dict, {
+            "id": obj.pk,
+            "name": "v1",
+            "related": [],
+        })
+        self.assertEqual(Version.objects.get_for_object(obj).get().raw_field_dict, {
+            "name": "v1",
+            "related": [],
+            "old_field": "old value"
+        })
+
 
 class FieldDictFieldsTest(TestBase):
 
@@ -346,6 +368,15 @@ class FieldDictExcludeTest(TestBase):
 
 
 class FieldDictInheritanceTest(DynamoDBTestMixin, TestModelParentMixin, TestBase):
+
+    def testRawFieldDictnheritance(self):
+        with reversion.create_revision():
+            obj = TestModelParent.objects.create()
+        self.assertEqual(Version.objects.get_for_object(obj).get().raw_field_dict, {
+            "name": "v1",
+            "related": [],
+            "parent_name": "parent v1",
+        })
 
     def testFieldDictInheritance(self):
         with reversion.create_revision():
@@ -382,6 +413,16 @@ class FieldDictInheritanceTest(DynamoDBTestMixin, TestModelParentMixin, TestBase
             "related": [],
             "parent_name": "parent v1",
             "testmodel_ptr_id": obj.pk,
+        })
+
+    @override_settings(REVERSION_BACKEND='dynamodb')
+    def testRawFieldDictInheritanceDynamoDB(self):
+        with reversion.create_revision():
+            obj = TestModelParent.objects.create()
+        self.assertEqual(DynamoDBVersion.objects.get_for_object(obj).get().raw_field_dict, {
+            "name": "v1",
+            "related": [],
+            "parent_name": "parent v1",
         })
 
     @override_settings(REVERSION_BACKEND='dynamodb')
