@@ -1,0 +1,83 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mysql:
+        image: mysql
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: root
+        options: >-
+          --health-cmd "mysqladmin -uroot -proot ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 3306:3306
+
+      dynamodb:
+        image: amazon/dynamodb-local
+        ports:
+          - 8000:8000
+    env:
+      DJANGO_DATABASE_HOST_POSTGRES: localhost
+      DJANGO_DATABASE_USER_POSTGRES: postgres
+      DJANGO_DATABASE_NAME_POSTGRES: postgres
+      DJANGO_DATABASE_PASSWORD_POSTGRES: postgres
+      DJANGO_DATABASE_HOST_MYSQL: 127.0.0.1
+      DJANGO_DATABASE_USER_MYSQL: root
+      DJANGO_DATABASE_NAME_MYSQL: root
+      DJANGO_DATABASE_PASSWORD_MYSQL: root
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r test_requirements.txt
+    - name: Run Tests
+      run: |
+        flake8 --config .config/flake8 reversion
+        coverage run tests/manage.py test tests --settings=tests.test_project.settings
+    - name: Coveralls
+      uses: AndreMiras/coveralls-python-action@develop
+      with:
+        parallel: true
+        flag-name: Unit Test
+  coveralls_finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: AndreMiras/coveralls-python-action@develop
+      with:
+        parallel-finished: true

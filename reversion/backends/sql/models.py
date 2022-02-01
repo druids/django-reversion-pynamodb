@@ -15,7 +15,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext
 from django.utils.translation import gettext_lazy as _
 
-from reversion.backends.utils import get_object_version, get_local_field_dict
+from reversion.backends.utils import get_object_version, get_local_field_dict, get_raw_field_dict
 from reversion.errors import RevertError
 from reversion.revisions import _follow_relations_recursive, _get_content_type
 from reversion.signals import pre_revision_commit, post_revision_commit
@@ -233,6 +233,42 @@ class Version(models.Model):
         return get_local_field_dict(self._model, self._object_version)
 
     @cached_property
+    def _local_raw_field_dict(self):
+        return get_raw_field_dict(self.serialized_data, self.object_repr, self.format)
+
+    def _get_parent_version_list(self):
+        field_dict = self._local_field_dict
+        parent_version_list = []
+        for parent_model, field in self._model._meta.concrete_model._meta.parents.items():
+            content_type = _get_content_type(parent_model, self._state.db)
+            parent_id = field_dict[field.attname]
+            try:
+                parent_version_list.append(
+                    self.revision.version_set.get(
+                        content_type=content_type,
+                        object_id=parent_id,
+                        db=self.db,
+                    )
+                )
+            except Version.DoesNotExist:
+                pass
+        return parent_version_list
+
+    @cached_property
+    def raw_field_dict(self):
+        """
+        A dictionary mapping field names to field values in this version
+        of the model.
+
+        This method will follow parent links, if present.
+        """
+        field_dict = self._local_raw_field_dict
+        # Add parent data.
+        for parent_version in self._get_parent_version_list():
+            field_dict.update(parent_version._local_raw_field_dict)
+        return field_dict
+
+    @cached_property
     def field_dict(self):
         """
         A dictionary mapping field names to field values in this version
@@ -242,18 +278,8 @@ class Version(models.Model):
         """
         field_dict = self._local_field_dict
         # Add parent data.
-        for parent_model, field in self._model._meta.concrete_model._meta.parents.items():
-            content_type = _get_content_type(parent_model, self._state.db)
-            parent_id = field_dict[field.attname]
-            try:
-                parent_version = self.revision.version_set.get(
-                    content_type=content_type,
-                    object_id=parent_id,
-                    db=self.db,
-                )
-                field_dict.update(parent_version.field_dict)
-            except Version.DoesNotExist:
-                pass
+        for parent_version in self._get_parent_version_list():
+            field_dict.update(parent_version._local_field_dict)
         return field_dict
 
     def revert(self):

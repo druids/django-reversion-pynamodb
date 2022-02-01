@@ -6,14 +6,14 @@ from django.utils.translation import ugettext
 
 from reversion.errors import RevertError
 from reversion.revisions import _get_options
+from reversion.serializers import deserialize_instance, deserialize_raw_fields
 
 
 def get_object_version(model, data, object_repr, format):
     version_options = _get_options(model)
     data = force_str(data.encode('utf8'))
     try:
-        return list(serializers.deserialize(format, data, ignorenonexistent=True,
-                                            use_natural_foreign_keys=version_options.use_natural_foreign_keys))[0]
+        return deserialize_instance(format, data, use_natural_foreign_keys=version_options.use_natural_foreign_keys)
     except DeserializationError:
         raise RevertError(ugettext('Could not load %(object_repr)s version - incompatible version data.') % {
             'object_repr': object_repr,
@@ -43,3 +43,17 @@ def get_local_field_dict(model, object_version):
         else:
             field_dict[field.attname] = getattr(obj, field.attname)
     return field_dict
+
+
+def get_raw_field_dict(data, object_repr, format):
+    try:
+        return deserialize_raw_fields(format, data)
+    except DeserializationError:
+        raise RevertError(ugettext('Could not load %(object_repr)s version - incompatible version data.') % {
+            'object_repr': object_repr,
+        })
+    except serializers.SerializerDoesNotExist:
+        raise RevertError(ugettext('Could not load %(object_repr)s version - unknown serializer %(format)s.') % {
+            'object_repr': object_repr,
+            'format': format,
+        })

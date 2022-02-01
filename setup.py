@@ -35,7 +35,7 @@ setup(
         "reversion": ["locale/*/LC_MESSAGES/django.*", "templates/reversion/*.html"]},
     cmdclass=cmdclass,
     install_requires=[
-        "django>=2.2",
+        "django>=2.2<4",
         "import_string>=0.1.0",
     ],
     python_requires='>=3.6',
