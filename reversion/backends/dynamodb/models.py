@@ -155,18 +155,21 @@ class Version(ReversionDynamoModel):
         return get_raw_field_dict(self.serialized_data, self.object_repr, self.format)
 
     def _get_parent_version_list(self):
-        field_dict = self._local_field_dict
         parent_version_list = []
         for parent_model, field in self._model._meta.concrete_model._meta.parents.items():
-            content_type = _get_content_type(parent_model)
-            parent_id = field_dict[field.attname]
-            try:
-                parent_version_list.append(Version.get(
-                    self.revision_id,
-                    get_key_from_content_type_and_id(content_type, parent_id)
-                ))
-            except Version.DoesNotExist:
-                pass
+            parent_id = (
+                self.object_id if self._model._meta.pk.attname == field.attname
+                else self._local_field_dict.get(field.attname)
+            )
+            if parent_id:
+                content_type = _get_content_type(parent_model)
+                try:
+                    parent_version_list.append(Version.get(
+                        self.revision_id,
+                        get_key_from_content_type_and_id(content_type, parent_id)
+                    ))
+                except Version.DoesNotExist:
+                    pass
         return parent_version_list
 
     @cached_property
@@ -180,7 +183,7 @@ class Version(ReversionDynamoModel):
         field_dict = self._local_raw_field_dict
         # Add parent data.
         for parent_version in self._get_parent_version_list():
-            field_dict.update(parent_version._local_raw_field_dict)
+            field_dict.update(parent_version.raw_field_dict)
         return field_dict
 
     @cached_property
@@ -194,7 +197,7 @@ class Version(ReversionDynamoModel):
         field_dict = self._local_field_dict
         # Add parent data.
         for parent_version in self._get_parent_version_list():
-            field_dict.update(parent_version._local_field_dict)
+            field_dict.update(parent_version.field_dict)
         return field_dict
 
     @cached_property
