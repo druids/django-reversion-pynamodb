@@ -13,19 +13,18 @@ class Command(BaseCommand):
         )
 
     def handle(self, **options):
-        if options['interactive']:
-            message = (
-                'This will delete existing revisions!\n'
-                'Are you sure you want to do this?\n\n'
-                "Type 'yes' to continue, or 'no' to cancel: "
-            )
-            if input(message) != 'yes':
-                raise CommandError('Init DynamoDB revisions cancelled.')
-
         self.stdout.write('Init DynamoDB revisions')
 
         connection = TableConnection('reversion')
         if connection.exists_table():
+            if options['interactive']:
+                message = (
+                    'This will delete existing revisions!\n'
+                    'Are you sure you want to do this?\n\n'
+                    "Type 'yes' to continue, or 'no' to cancel: "
+                )
+                if input(message) != 'yes':
+                    raise CommandError('Init DynamoDB revisions cancelled.')
             connection.delete_table(wait=True)
         connection.create_table(
             **{
