@@ -148,3 +148,5 @@ PYDJAMODB_DATABASE = {
 }
 
 TEST_RUNNER = 'pydjamodb.test_runner.DynamoDBTestDiscoverRunner'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

@@ -10,8 +10,6 @@ import reversion
 from test_app.models import TestModel, TestModelRelated, TestModelThrough, TestModelParent, TestMeta
 from test_app.tests.base import TestBase, TestBaseTransaction, TestModelMixin, UserMixin
 
-from pydjamodb.tests import DynamoDBTestMixin
-
 
 class SaveTest(TestModelMixin, TestBase):
 
@@ -137,7 +135,7 @@ class CreateRevisionTest(TestModelMixin, TestBase):
         self.assertEqual(_callback.call_count, 1)
 
 
-class CreateRevisionAtomicTest(DynamoDBTestMixin, TestModelMixin, TestBaseTransaction):
+class CreateRevisionAtomicTest(TestModelMixin, TestBaseTransaction):
 
     def testCreateRevisionAtomic(self):
         self.assertFalse(get_connection().in_atomic_block)

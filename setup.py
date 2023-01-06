@@ -38,6 +38,9 @@ setup(
         "django>=2.2<4",
         "import_string>=0.1.0",
     ],
+    extras_require={
+        'dynamodb': ['pydjamodb>=0.0.9', 'pynamodb<=5.1.0', 'boto3<=1.24.96'],
+    },
     python_requires='>=3.6',
     classifiers=[
         "Development Status :: 5 - Production/Stable",

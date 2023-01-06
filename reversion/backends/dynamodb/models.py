@@ -177,7 +177,6 @@ class Version(ReversionDynamoModel):
         """
         A dictionary mapping field names to field values in this version
         of the model.
-
         This method will follow parent links, if present.
         """
         field_dict = self._local_raw_field_dict
@@ -191,7 +190,6 @@ class Version(ReversionDynamoModel):
         """
         A dictionary mapping field names to field values in this version
         of the model.
-
         This method will follow parent links, if present.
         """
         field_dict = self._local_field_dict

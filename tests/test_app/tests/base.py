@@ -10,6 +10,8 @@ from django.test import TestCase, TransactionTestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 
+from germanium.test_cases.default import GermaniumTestCaseMixin
+
 import reversion
 from reversion.backends.sql.models import Revision, Version
 from test_app.models import TestModel, TestModelParent
@@ -17,7 +19,7 @@ from test_app.models import TestModel, TestModelParent
 
 # Test helpers.
 
-class TestBaseMixin(object):
+class TestBaseMixin(GermaniumTestCaseMixin):
 
     databases = list(settings.DATABASES.keys())
 

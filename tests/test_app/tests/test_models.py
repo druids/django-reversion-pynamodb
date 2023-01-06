@@ -10,10 +10,9 @@ from test_app.models import (
 from test_app.tests.base import TestBase, TestModelMixin, TestModelParentMixin, TestModelParentWithoutFollowMixin
 import json
 
-from pydjamodb.tests import DynamoDBTestMixin
 
 
-class GetForModelTest(DynamoDBTestMixin, TestModelMixin, TestBase):
+class GetForModelTest(TestModelMixin, TestBase):
 
     def testGetForModel(self):
         with reversion.create_revision():
@@ -41,7 +40,7 @@ class GetForModelDbTest(TestModelMixin, TestBase):
         self.assertEqual(Version.objects.using("mysql").get_for_model(obj.__class__).count(), 1)
 
 
-class GetForObjectTest(DynamoDBTestMixin, TestModelMixin, TestBase):
+class GetForObjectTest(TestModelMixin, TestBase):
 
     def testGetForObject(self):
         with reversion.create_revision():
@@ -81,7 +80,7 @@ class GetForObjectTest(DynamoDBTestMixin, TestModelMixin, TestBase):
         self.assertEqual(DynamoDBVersion.objects.get_for_object(obj).count(), 0)
 
 
-class GetForObjectDbTest(DynamoDBTestMixin, TestModelMixin, TestBase):
+class GetForObjectDbTest(TestModelMixin, TestBase):
     databases = {"default", "mysql", "postgres"}
 
     def testGetForObjectDb(self):
@@ -97,7 +96,7 @@ class GetForObjectDbTest(DynamoDBTestMixin, TestModelMixin, TestBase):
         self.assertEqual(Version.objects.using("mysql").get_for_object(obj).count(), 1)
 
 
-class GetForObjectModelDbTest(DynamoDBTestMixin, TestModelMixin, TestBase):
+class GetForObjectModelDbTest(TestModelMixin, TestBase):
     databases = {"default", "postgres"}
 
     def testGetForObjectModelDb(self):
@@ -132,7 +131,7 @@ class GetForObjectUniqueTest(TestModelMixin, TestBase):
         self.assertEqual(len(list(Version.objects.get_for_object(obj).get_unique())), 2)
 
 
-class GetForObjectReferenceTest(DynamoDBTestMixin, TestModelMixin, TestBase):
+class GetForObjectReferenceTest(TestModelMixin, TestBase):
 
     def testGetForObjectReference(self):
         with reversion.create_revision():
@@ -198,7 +197,7 @@ class GetForObjectReferenceModelDbTest(TestModelMixin, TestBase):
         self.assertEqual(Version.objects.get_for_object_reference(TestModel, obj.pk, model_db="mysql").count(), 1)
 
 
-class GetDeletedTest(DynamoDBTestMixin, TestModelMixin, TestBase):
+class GetDeletedTest(TestModelMixin, TestBase):
     databases = {"default", "mysql", "postgres"}
 
     def testGetDeleted(self):
@@ -250,7 +249,6 @@ class GetDeletedTest(DynamoDBTestMixin, TestModelMixin, TestBase):
             obj.save()
         with reversion.create_revision():
             obj.delete()
-
         self.assertEqual(DynamoDBVersion.objects.get_deleted(TestModel).count(), 1)
 
     @override_settings(REVERSION_BACKEND='dynamodb')
@@ -289,7 +287,7 @@ class GetDeletedModelDbTest(TestModelMixin, TestBase):
         self.assertEqual(Version.objects.get_deleted(TestModel, model_db="postgres").count(), 1)
 
 
-class FieldDictTest(DynamoDBTestMixin, TestModelMixin, TestBase):
+class FieldDictTest(TestModelMixin, TestBase):
 
     def testFieldDict(self):
         with reversion.create_revision():
@@ -367,7 +365,7 @@ class FieldDictExcludeTest(TestBase):
         })
 
 
-class FieldDictInheritanceTest(DynamoDBTestMixin, TestModelParentMixin, TestBase):
+class FieldDictInheritanceTest(TestModelParentMixin, TestBase):
 
     def testRawFieldDictnheritance(self):
         with reversion.create_revision():
@@ -441,7 +439,7 @@ class FieldDictInheritanceTest(DynamoDBTestMixin, TestModelParentMixin, TestBase
         })
 
 
-class FieldDictInheritanceWithoutFollowTest(DynamoDBTestMixin, TestModelParentWithoutFollowMixin, TestBase):
+class FieldDictInheritanceWithoutFollowTest(TestModelParentWithoutFollowMixin, TestBase):
 
     def testFieldDictInheritanceWithoutParentFollow(self):
         with reversion.create_revision():
