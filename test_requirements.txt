@@ -1,11 +1,8 @@
-boto3==1.24.96
 django==3.2
 django-germanium==2.3.6
-pydjamodb==0.0.9
-pynamodb==5.1.0
 flake8
 coverage
 sphinx
 psycopg2-binary
 mysqlclient==2.1.1
--e .
+-e .[dynamodb]

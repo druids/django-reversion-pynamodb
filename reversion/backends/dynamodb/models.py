@@ -103,6 +103,22 @@ class ReversionDynamoModel(DynamoModel):
     object_content_type_key_removed_index = RemovedVersionIndex()
     object_content_type_created_index = VersionModelDateCreatedIndex()
 
+    @classmethod
+    def from_raw_data(cls, data):
+        """
+        Returns an instance of this class
+        from the raw data
+        If object_key is equal to the NULL_OBJ_KEY value is instance ov Revision,
+        otherwise Version instance is returned
+        """
+        if data is None:
+            raise ValueError("Received no data to construct object")
+
+        if data['object_key']['S'] == NULL_OBJ_KEY:
+            return Revision._instantiate(data)
+        else:
+            return Version._instantiate(data)
+
     class Meta:
         table_name = 'reversion'
 
@@ -112,8 +128,6 @@ class ReversionDynamoModel(DynamoModel):
 
 
 class Revision(ReversionDynamoModel):
-
-    object_date_created_index = VersionObjectDateCreatedIndex()
 
     objects = RevisionDynamoDBQuerySet.as_manager()
     objects_version = ObjectVersionRevisionDynamoDBQuerySet.as_manager()
@@ -127,10 +141,6 @@ class Revision(ReversionDynamoModel):
 
 
 class Version(ReversionDynamoModel):
-
-    object_date_created_index = VersionObjectDateCreatedIndex()
-    object_content_type_key_removed_index = RemovedVersionIndex()
-    object_content_type_created_index = VersionModelDateCreatedIndex()
 
     objects = ObjectVersionDynamoDBQuerySet.as_manager()
     objects_all = DynamoDBManager()

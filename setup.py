@@ -39,7 +39,7 @@ setup(
         "import_string>=0.1.0",
     ],
     extras_require={
-        'dynamodb': ['pydjamodb>=0.0.9', 'pynamodb<=5.1.0', 'boto3<=1.24.96'],
+        'dynamodb': ['pydjamodb>=0.0.10', 'pynamodb>=5.3.4'],
     },
     python_requires='>=3.6',
     classifiers=[
