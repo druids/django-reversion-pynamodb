@@ -316,10 +316,13 @@ Revision API
     .. include:: /_include/model-db-arg.rst
 
 
+SQL backend
+-----------
+
 .. _VersionQuerySet:
 
 reversion.backends.sql.models.VersionQuerySet
----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A ``QuerySet`` of :ref:`Version`. The results are ordered with the most recent :ref:`Version` first.
 
@@ -386,9 +389,9 @@ A ``QuerySet`` of :ref:`Version`. The results are ordered with the most recent :
 .. _Version:
 
 reversion.backends.sql.models.Version
--------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Represents a single model instance serialized in a revision.
+Represents a single model instance serialized in a revision stored in a SQL database.
 
 
 ``Version.id``
@@ -453,7 +456,7 @@ Represents a single model instance serialized in a revision.
 .. _Revision:
 
 reversion.sql.backends.models.Revision
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Contains metadata about a revision, and groups together all :ref:`Version` instances created in that revision.
 
@@ -487,3 +490,139 @@ Contains metadata about a revision, and groups together all :ref:`Version` insta
 
     ``delete``
         If ``True``, any model instances which have been created and are reachable by the ``follow`` clause of any model instances in this revision will be deleted. This effectively restores a group of related models to the state they were in when the revision was created.
+
+DynamoDB backend backend
+------------------------
+
+.. dynamodb._ReversionDynamoModel:
+
+reversion.backends.dynamodb.models.ReversionDynamoModel
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+DynamoDB backend stores Versions and Reversions in the same index. Difference between Version and Reversion is that the ``object_key`` field is filled with value '-' which represents null value.
+
+There are prepared Global secondary indexes to filter Versions and Reversions objects with the same way as in the SQL database.
+
+
+``ReversionDynamoModel.revision_id``
+
+    The identifier of Revision in UUID form.
+
+
+``ReversionDynamoModel.date_created``
+
+    A ``datetime`` when the revision was created.
+
+
+``ReversionDynamoModel.user_key``
+
+    The key of the ``User`` that created the revision, or None. Key is generated as a triple ``model DB|content type ID|user ID``. Model cointains property user to get user instance from the key.
+
+``ReversionDynamoModel.comment``
+
+    A text comment on the revision.
+
+``ReversionDynamoModel.object_key``
+
+    The key of the versioned object. For Revision this value is set to '-' which represents null value.
+
+``ReversionDynamoModel.object_content_type_key``
+
+    The content type key generated as a pair `'model db|content type ID'`. For reversion object the value is not set.
+
+    Model property `content_type` returns the instance of ContentType model for Version object (for Revision None is returned)
+
+``ReversionDynamoModel.format``
+
+    The name of the Django serialization format used to serialize the model instance.
+
+``ReversionDynamoModel.serialized_data``
+
+    The raw serialized data of the model instance (only set for the Version objects)
+
+``ReversionDynamoModel.object_repr``
+
+   The stored snapshot of the model instance's ``__str__`` method when the instance was serialized (only set for the Version objects).
+
+``ReversionDynamoModel.is_removed``
+
+    Value `is_removed` is set to `True` if registered object instance was removed from the database.
+
+
+reversion.backends.dynamodb.models.Reversion
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``Reversion`` objects inherits ``ReversionDynamoModel`` and represents only objects without ``object_key`` and ``serialized_data``. It is similar to the SQL Revision object.
+
+``Reversion.objects``
+
+    Return queryset of revision objects which can be filtered with the similar way as the django queryset. (https://github.com/druids/pydjamodb). Hash key is field `revision_id` and range key is `object_key`. This queryset should be used to get all Revisions.
+
+``Reversion.objects_version``
+
+   Return queryset of revision objects which purpose is filter and order Revisions according to field `data_crated`.
+
+reversion.backends.dynamodb.models.Version
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``Version.revision``
+
+    Return revision instance related to the version object.
+
+``Version.object``
+
+    Return object related with the version object.
+
+``Version.object_id``
+
+    Return object ID of the related object.
+
+``Version.content_type_id``
+
+    Return content type ID of the related object.
+
+``Version.prev_version``
+
+    Return the previous version of the related object.
+
+``Version.field_dict``
+
+    A dictionary of stored model fields. This includes fields from any parent models in the same revision.
+
+    .. include:: /_include/throws-revert-error.rst
+
+``Version.raw_field_dict``
+
+    A dictionary of stored raw model fields. This includes fields from any parent models in the same revision. And include fields that was removed from model class.
+
+    .. include:: /_include/throws-revert-error.rst
+
+``Version.revert()``
+
+    Restores the serialized model instance to the database. To restore the entire revision, use :ref:`Revision.revert() <Revision-revert>`.
+
+    .. include:: /_include/throws-revert-error.rst
+
+``Version.objects``
+
+    Queryset which uses a global secondary index with the `object_key` field as a hash key and `date_created` as a range key. This queryset should be used to get Version of one object ordered by time.
+
+``Version.objects_all``
+
+    Queryset which allows to filter data according to the revision ID and objects key. Can be used get all versions of a revision.
+
+``Version.objects.get_for_model(model, model_db=None)``
+
+    Returns a `Version` iterable for the given model.
+
+``Version.objects.get_for_object(obj, model_db=None)``
+
+    Returns a`Version` iterable for the given model instance.
+
+``Version.objects.get_deleted(model, model_db=None)``
+
+    Returns a`Version` iterable for the given model containing versions where the serialized model no longer exists in the database.
+
+``Version.objects.get_for_object_reference(model, model, object_id, model_db=None)``
+
+    Returns a`Version` iterable for the given model and primary key.

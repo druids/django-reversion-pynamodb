@@ -22,8 +22,8 @@ Installation
 To install django-reversion-pynamodb:
 
 1.  Install with pip: ``pip install django-reversion-pynamodb``.
-2.  Add ``'reversion'`` and ``reversion.backends.sql`` to ``INSTALLED_APPS``.
-3.  Run ``manage.py migrate``.
+2.  Add ``'reversion'`` and ``reversion.backends.sql`` or ``reversion.backends.dynamodb`` to ``INSTALLED_APPS``.
+3.  Run ``manage.py migrate`` or ``manage.py initdynamodbreversion`` for dynamodb backend.
 
 
 Admin integration
